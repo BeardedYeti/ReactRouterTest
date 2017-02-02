@@ -1,5 +1,5 @@
-export const Whoops404 = ({ location }) =>
+export const Error404 = ({ location }) =>
     <div>
-        <h1>Whoops, resource not found</h1>
+        <h1>Error404 resource not found</h1>
         <p>Could not find {location.pathname}</p>
     </div>
