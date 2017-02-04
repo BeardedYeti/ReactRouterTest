@@ -6,37 +6,66 @@ class MemberList extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            members: [
-            {
-                name: "Colin Smith",
-                email: "colin.smith@example.com",
-                thumbnail: "https://randomuser.me/api/portraits/men/53.jpg"
-            },
-            {
-                name: "Bill Belicheck",
-                email: "bill.belicheck@example.com",
-                thumbnail: "https://randomuser.me/api/portraits/men/74.jpg"
-            },
-            {
-                name: "J.K. Rowling",
-                email: "jk.rowling@example.com",
-                thumbnail: "https://randomuser.me/api/portraits/women/34.jpg"
-            }
-          ]
+            members: [],
+            loading: false,
+            administrators: []
         }
+        this.makeAdmin = this.makeAdmin.bind(this)
+        this.removeAdmin = this.removeAdmin.bind(this)
+    }
+
+    componentDidMount() {
+    	this.setState({loading: true})
+    	fetch('https://api.randomuser.me/?nat=US&results=12')
+    		.then(response => response.json())
+    		.then(json => json.results)
+    		.then(members => this.setState({
+    			members,
+    			loading: false
+    		}))
+    }
+
+    makeAdmin(email) {
+        const administrators = [
+            ...this.state.administrators,
+            email
+        ]
+        this.setState({administrators})
+    }
+
+    removeAdmin(email) {
+        const administrators = this.state.administrators.filter(
+            adminEmail => adminEmail !== email
+        )
+        this.setState({administrators})
     }
 
     render() {
-    	const { members } = this.state
+    	const { administrators, members, loading } = this.state
         return (
             <div className="member-list">
             	<h1>Society Members</h1>
-				{members.map(
-					(data, i) => 
+
+            	{(loading) ? 
+            		<span>loading...</span> : 
+            		<span>{members.length} members</span>
+            	}
+
+				{(members.length) ? 
+					members.map(
+					(member, i) => 
 						<Member key={i} 
-								onClick={email => console.log(email)}
-								{...data} />
-				)}
+								admin={this.state.administrators.some(
+									adminEmail => adminEmail === member.email
+								)}
+								name={member.name.first + ' ' + member.name.last}
+								email={member.email}
+								thumbnail={member.picture.thumbnail}
+								makeAdmin={this.makeAdmin}
+								removeAdmin={this.removeAdmin} />
+				):
+				<span>Currently 0 Members </span>
+				}
             </div>
         )    
    }     
